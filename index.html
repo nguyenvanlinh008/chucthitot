@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lời Chúc Từ Văn Linh</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        body {
+            font-family: 'Quicksand', sans-serif;
+            margin: 0;
+            overflow: hidden; /* Prevent scrolling when particles fall */
+            background: linear-gradient(135deg, #e0f2fe 0%, #dcfce7 100%);
+            height: 100vh;
+            width: 100vw;
+        }
+
+        /* Screen transition animations */
+        .fade-out {
+            animation: fadeOut 0.8s forwards;
+        }
+        .fade-in {
+            animation: fadeIn 1s forwards;
+            display: flex !important; /* Override hidden */
+        }
+
+        @keyframes fadeOut {
+            from { opacity: 1; transform: scale(1); }
+            to { opacity: 0; transform: scale(0.95); visibility: hidden; }
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Text reveal animations */
+        .message-line {
+            opacity: 0;
+            transform: translateY(20px);
+            transition: opacity 1s ease-out, transform 1s ease-out;
+            margin-bottom: 1.5rem;
+            line-height: 1.6;
+        }
+
+        .message-line.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* Particle (Cỏ 4 lá, 100, v.v.) animations */
+        .particle {
+            position: absolute;
+            top: -10vh;
+            user-select: none;
+            pointer-events: none;
+            z-index: 10;
+            animation: fall linear forwards;
+        }
+
+        @keyframes fall {
+            to {
+                transform: translateY(110vh) rotate(360deg);
+            }
+        }
+
+        /* Button pulsing effect */
+        .btn-pulse {
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.7); }
+            70% { transform: scale(1.05); box-shadow: 0 0 0 15px rgba(34, 197, 94, 0); }
+            100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(34, 197, 94, 0); }
+        }
+
+        /* Highlight text styling */
+        .highlight {
+            color: #16a34a;
+            font-weight: 700;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Screen 1: Lời mời -->
+    <div id="intro-screen" class="fixed inset-0 flex flex-col items-center justify-center bg-white/30 backdrop-blur-sm z-50 transition-all duration-700">
+        <div class="bg-white/80 p-8 md:p-12 rounded-3xl shadow-2xl text-center max-w-md mx-4 border border-white">
+            <div class="text-5xl mb-6 animate-bounce">💌</div>
+            <h1 class="text-2xl md:text-3xl font-bold text-gray-800 mb-8 leading-relaxed">
+                Bạn có muốn xem <span class="highlight">Văn Linh</span> nhắn nhủ gì với bạn không?
+            </h1>
+            <div class="flex flex-col gap-4">
+                <button id="yes-btn" class="btn-pulse bg-green-500 hover:bg-green-600 text-white font-bold py-4 px-8 rounded-full text-xl transition-colors shadow-lg">
+                    Có, mở ra xem ngay! 💖
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Screen 2: Lời chúc -->
+    <div id="message-screen" class="hidden fixed inset-0 flex-col items-center justify-center p-6 text-center z-20">
+        <div class="max-w-3xl bg-white/60 backdrop-blur-md p-8 md:p-12 rounded-3xl shadow-xl border border-white/50">
+            <div id="text-container" class="text-lg md:text-2xl text-gray-800 font-medium">
+                <!-- Nội dung sẽ được thêm bằng JavaScript -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Container cho các hạt rơi -->
+    <div id="particles-container" class="fixed inset-0 pointer-events-none z-10"></div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const introScreen = document.getElementById('intro-screen');
+            const messageScreen = document.getElementById('message-screen');
+            const yesBtn = document.getElementById('yes-btn');
+            const textContainer = document.getElementById('text-container');
+            const particlesContainer = document.getElementById('particles-container');
+
+            // Mảng chứa các đoạn văn bản
+            const messages = [
+                "Trong thời gian vừa qua chắc hẳn bạn đã cố gắng và nỗ lực thật nhiều. 🌱",
+                "Ngày mai là một ngày rất quan trọng đối với các sĩ tử chúng ta. ⏳",
+                "Mình chúc bạn ngày mai thi thật tốt, làm bài suôn sẻ và đạt điểm cao. 💯",
+                "Mong rằng mọi sự lựa chọn của bạn đều là lựa chọn sáng suốt và dẫn đến thành công. 🌟",
+                "<span class='text-green-600 font-bold text-3xl md:text-4xl block mt-6'>Cố lên nhé! Văn Linh luôn ủng hộ bạn! 🍀💪</span>"
+            ];
+
+            const icons = ['🍀', '💯', '✨', '🌟', '💖', '🎓'];
+            let particleInterval;
+
+            yesBtn.addEventListener('click', () => {
+                // 1. Ẩn màn hình intro
+                introScreen.classList.add('fade-out');
+                
+                setTimeout(() => {
+                    introScreen.style.display = 'none';
+                    // 2. Hiện màn hình message
+                    messageScreen.classList.remove('hidden');
+                    messageScreen.classList.add('fade-in');
+                    
+                    // 3. Bắt đầu rơi icon
+                    startParticles();
+                    
+                    // 4. Bắt đầu hiển thị chữ
+                    showTextLineByLine();
+                }, 800); // Chờ hiệu ứng fade-out xong
+            });
+
+            function showTextLineByLine() {
+                messages.forEach((msg, index) => {
+                    // Tạo thẻ div cho mỗi dòng
+                    const p = document.createElement('p');
+                    p.innerHTML = msg;
+                    p.className = 'message-line';
+                    textContainer.appendChild(p);
+
+                    // Hiện từng dòng với độ trễ
+                    setTimeout(() => {
+                        p.classList.add('visible');
+                    }, index * 2500); // Mỗi dòng cách nhau 2.5 giây
+                });
+            }
+
+            function createParticle() {
+                const particle = document.createElement('div');
+                particle.className = 'particle text-2xl md:text-4xl';
+                
+                // Chọn ngẫu nhiên 1 icon
+                particle.innerText = icons[Math.floor(Math.random() * icons.length)];
+                
+                // Vị trí ngang ngẫu nhiên
+                particle.style.left = Math.random() * 100 + 'vw';
+                
+                // Thời gian rơi ngẫu nhiên (từ 4s đến 8s)
+                const fallDuration = Math.random() * 4 + 4;
+                particle.style.animationDuration = fallDuration + 's';
+                
+                // Kích thước ngẫu nhiên một chút
+                particle.style.transform = `scale(${Math.random() * 0.5 + 0.8})`;
+
+                particlesContainer.appendChild(particle);
+
+                // Xóa particle sau khi rơi xong để không bị nặng máy
+                setTimeout(() => {
+                    particle.remove();
+                }, fallDuration * 1000);
+            }
+
+            function startParticles() {
+                // Tạo particle liên tục mỗi 300ms
+                particleInterval = setInterval(createParticle, 300);
+                
+                // Tạo ngay một vài cái lúc mới mở
+                for(let i=0; i<10; i++) {
+                    setTimeout(createParticle, i * 100);
+                }
+            }
+        });
+    </script>
+</body>
+</html>
